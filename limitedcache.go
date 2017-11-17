@@ -72,6 +72,14 @@ func (c *Cache) Lost() int {
 	return c.lost
 }
 
+// ResetLost sets lost counter to 0.
+func (c *Cache) ResetLost() int {
+	c.m.Lock()
+	defer c.m.Unlock()
+	c.lost = 0
+	return c.lost
+}
+
 func (c *Cache) send(op OpType, key, file string, err error) {
 	c.m.Lock()
 	defer c.m.Unlock()
