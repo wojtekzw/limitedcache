@@ -80,7 +80,7 @@ func (c *Cache) send(op OpType, key, file string, err error) {
 		c.lost++
 		return
 	}
-	c.eventC <- CacheOp{E: op, Key: key, File: file, Err: err}
+	c.eventC <- CacheOp{op: op, key: key, file: file, err: err}
 }
 
 func keyToFilename(key string) string {

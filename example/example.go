@@ -16,7 +16,7 @@ func printCacheOperations(c *limitedcache.Cache) {
 	for {
 		select {
 		case ev := <-ec:
-			log.Printf("event: %s, %s, %v", ev.Operation(), ev.Key, ev.Err)
+			log.Printf("event: %s, %s, %v", ev.Operation(), ev.Key(), ev.Status())
 		}
 	}
 }
