@@ -80,6 +80,22 @@ func (c *Cache) ResetLost() int {
 	return c.lost
 }
 
+// LoadKeysFromDisk - loads cache keys to memory to keep limited cache
+func (c *Cache) LoadKeysFromDisk(basePath string) {
+	err := filepath.Walk(basePath, func(path string, f os.FileInfo, err error) error {
+		if err == nil && !f.IsDir() {
+			c.kc.Set(filepath.Base(path), struct{}{})
+		}
+		return err
+	})
+
+	if err != nil {
+		log.Printf("error loading keys from disk: %v,", err)
+	}
+	log.Printf("loaded keys from disk: %d", c.kc.Len())
+
+}
+
 func (c *Cache) send(op OpType, key, file string, err error) {
 	c.m.Lock()
 	defer c.m.Unlock()
@@ -98,21 +114,6 @@ func keyToFilename(key string) string {
 	return s
 }
 
-func loadKeysFromDisk(basePath string, kc gcache.Cache) {
-	err := filepath.Walk(basePath, func(path string, f os.FileInfo, err error) error {
-		if err == nil && !f.IsDir() {
-			kc.Set(filepath.Base(path), struct{}{})
-		}
-		return err
-	})
-
-	if err != nil {
-		log.Printf("error loading keys from disk: %v,", err)
-	}
-	log.Printf("loaded keys from disk: %d", kc.Len())
-
-}
-
 // New returns a new Cache that will store files in basePath
 func New(basePath string, limit int) *Cache {
 
@@ -126,7 +127,6 @@ func New(basePath string, limit int) *Cache {
 		d.Erase(key.(string))
 	}).Build()
 
-	loadKeysFromDisk(basePath, kc)
 	return &Cache{
 		d:      d,
 		kc:     kc,
@@ -141,7 +141,6 @@ func NewWithDiskv(d *diskv.Diskv, limit int) *Cache {
 		d.Erase(key.(string))
 	}).Build()
 
-	loadKeysFromDisk(d.BasePath, kc)
 	return &Cache{
 		d:      d,
 		kc:     kc,
