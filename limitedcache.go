@@ -14,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"log"
 
@@ -82,6 +83,8 @@ func (c *Cache) ResetLost() int {
 
 // LoadKeysFromDisk - loads cache keys to memory to keep limited cache
 func (c *Cache) LoadKeysFromDisk(basePath string) {
+	log.Print("started loading keys from disk")
+	s := time.Now()
 	err := filepath.Walk(basePath, func(path string, f os.FileInfo, err error) error {
 		if err == nil && !f.IsDir() {
 			c.kc.Set(filepath.Base(path), struct{}{})
@@ -92,7 +95,7 @@ func (c *Cache) LoadKeysFromDisk(basePath string) {
 	if err != nil {
 		log.Printf("error loading keys from disk: %v,", err)
 	}
-	log.Printf("loaded keys from disk: %d", c.kc.Len())
+	log.Printf("loaded keys from disk: %d in %.0f seconds", c.kc.Len(), time.Now().Sub(s).Seconds())
 
 }
 
